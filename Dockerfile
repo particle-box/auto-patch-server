@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # 1) System deps: Python + Java for lspatch
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip openjdk-17-jre-headless && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip openjdk-21-jre-headless && \
     apt-get clean
 
 # 2) Python deps
