@@ -75,4 +75,5 @@ def root():
     return "<b>Patch server is running!</b>"
 
 if __name__ == "__main__":
+    # Bind to 0.0.0.0 and a known port (Render expects 0.0.0.0 and defaults to 10000)
     app.run(host="0.0.0.0", port=10000)
