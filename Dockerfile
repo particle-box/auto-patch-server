@@ -17,4 +17,4 @@ COPY . .
 ENV PORT=10000
 
 # 4) Start (shell form so $PORT expands)
-CMD ["sh","-lc","gunicorn app:app --bind 0.0.0.0:${PORT}"]
+CMD ["sh", "-lc", "gunicorn app:app --timeout 600 --bind 0.0.0.0:${PORT}"]
