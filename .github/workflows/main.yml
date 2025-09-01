@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   patch_apks:
     runs-on: ubuntu-latest
@@ -33,17 +36,27 @@ jobs:
           java -jar lspatch.jar -f -l 2 -v snapchat-12.33.1.19.apk
           name=$(ls *lspatched.apk | head -n 1)
           mv "$name" "patched/PatchedSnapchat-12.33-noembed.apk"
-          rm *lspatched.apk || true
+          rm -f *lspatched.apk
 
       - name: Patch 13.51 WITH EMBED
         run: |
           java -jar lspatch.jar -m core.apk -f -l 2 -v snapchat-13.51.0.56.apk
           name=$(ls *lspatched.apk | head -n 1)
           mv "$name" "patched/PatchedSnapchat-13.51-embedded.apk"
-          rm *lspatched.apk || true
+          rm -f *lspatched.apk
 
       - name: Upload patched APKs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: patched-apks
           path: patched/*.apk
+
+      - name: Upload patched APKs to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0   # Use your release tag here
+          name: Auto-patched Snapchats
+          files: |
+            patched/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
