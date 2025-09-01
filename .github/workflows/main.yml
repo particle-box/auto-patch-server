@@ -1,0 +1,49 @@
+name: Patch Snapchat
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  patch_apks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download Snapchat APKs (Release assets)
+        run: |
+          wget -O snapchat-12.33.1.19.apk https://github.com/particle-box/auto-patch-server/releases/download/v1.0.0/snapchat-12.33.1.19.apk
+          wget -O snapchat-13.51.0.56.apk https://github.com/particle-box/auto-patch-server/releases/download/v1.0.0/snapchat-13.51.0.56.apk
+
+      - name: Fetch core.apk (from SnapEnhance prerelease)
+        run: |
+          python3 fetch_core_snapenhance.py
+
+      - name: Patch 12.33 NO EMBED
+        run: |
+          mkdir -p patched
+          java -jar lspatch.jar -f -l 2 -v snapchat-12.33.1.19.apk
+          name=$(ls *lspatched.apk | head -n 1)
+          mv "$name" "patched/PatchedSnapchat-12.33-noembed.apk"
+          rm *lspatched.apk || true
+
+      - name: Patch 13.51 WITH EMBED
+        run: |
+          java -jar lspatch.jar -m core.apk -f -l 2 -v snapchat-13.51.0.56.apk
+          name=$(ls *lspatched.apk | head -n 1)
+          mv "$name" "patched/PatchedSnapchat-13.51-embedded.apk"
+          rm *lspatched.apk || true
+
+      - name: Upload patched APKs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-apks
+          path: patched/*.apk
