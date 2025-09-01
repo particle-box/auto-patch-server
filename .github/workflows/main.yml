@@ -1,9 +1,7 @@
-name: Patch Snapchat
+name: Patch Snapchats and Release
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 permissions:
   contents: write
@@ -45,18 +43,24 @@ jobs:
           mv "$name" "patched/PatchedSnapchat-13.51-embedded.apk"
           rm -f *lspatched.apk
 
-      - name: Upload patched APKs as artifacts
+      - name: Upload patched APKs as workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: patched-apks
           path: patched/*.apk
 
-      - name: Upload patched APKs to GitHub Release
+      - name: Get current datetime for tag
+        id: tag
+        run: |
+          echo "version=v$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release and upload APKs
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0   # Use your release tag here
-          name: Auto-patched Snapchats
-          files: |
-            patched/*.apk
+          tag_name: ${{ steps.tag.outputs.version }}
+          name: Auto-patched Snapchats ${{ steps.tag.outputs.version }}
+          body: |
+            Automated patched build for ${{ steps.tag.outputs.version }}.
+          files: patched/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
